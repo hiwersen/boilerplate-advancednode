@@ -36,7 +36,7 @@ myDB(async client => {
   const myDataBase = await client.db().collection('users');
   const { databaseName } = client.db();
 
-  console.log(databaseName);
+  console.log(`Connected to Database - ${databaseName}. Please log in`);
 
   app.route('/').get((req, res) => {
     res.render('index', { title: `Connected to Database - ${databaseName}`, message: 'Please log in' });
