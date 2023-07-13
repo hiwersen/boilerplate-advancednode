@@ -73,6 +73,7 @@ myDB(async client => {
 
   const ensureAuthenticated = (req, res, next) => {
     if (req.isAuthenticated()) return next();
+    console.log('Non authenticated user tried to access /profile page');
     return res.redirect('/');
   };
 
