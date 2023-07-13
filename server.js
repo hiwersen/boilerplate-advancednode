@@ -23,29 +23,39 @@ app.use(session({
    }
  }));
 
-// Then: set up the middleware passport.initialize() and passport.session()
+// Then: set up the middleware passport.initialize(), and then passport.session(), in this order
 app.use(passport.initialize());
 app.use(passport.session());
-
-
 
 fccTesting(app); //For FCC testing purposes
 app.use('/public', express.static(process.cwd() + '/public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.route('/').get((req, res) => {
-  res.render('index', { title: 'Hello', message: 'Please log in' });
-});
+myDB(async client => {
+  const myDataBase = await client.db().collection('users');
+  const { databaseName } = client.db();
 
-passport.serializeUser((user, done) => {
-  done(null, user._id);
-});
+  console.log(databaseName);
 
-passport.deserializeUser((id, done) => {
-  //myDB.findOne({ _id: new ObjectID(id) }, (error, doc) => {
-    done(null, null);
-  //});
+  app.route('/').get((req, res) => {
+    res.render('index', { title: `Connected to Database - ${databaseName}`, message: 'Please log in' });
+  });
+  
+  passport.serializeUser((user, done) => {
+    done(null, user._id);
+  });
+  
+  passport.deserializeUser((id, done) => {
+    myDataBase.findOne({ _id: new ObjectID(id) }, (error, doc) => {
+      done(null, doc);
+    });
+  });
+
+}).catch(error => {
+  app.route('/').get((req, res) => {
+    res.render('index', { title: e, message: 'Unable to connect to database' });
+  });
 });
 
 const PORT = process.env.PORT || 3000;
