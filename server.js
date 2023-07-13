@@ -15,7 +15,11 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: true,
   saveUninitialized: true,
-  cookie: { secure: false }
+  cookie: { 
+    secure: false,
+    httpOnly: true,
+    maxAge: 60 * 60 * 1000 // 1 hour
+   }
  }));
 
 // Then: set up the middleware passport.session() and passport.initialize()
