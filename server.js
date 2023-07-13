@@ -40,7 +40,11 @@ myDB(async client => {
   console.log(`Connected to Database - ${databaseName}. Please log in`);
 
   app.route('/').get((req, res) => {
-    res.render('index', { title: `Connected to Database - ${databaseName}`, message: 'Please log in' });
+    res.render('index', { 
+      title: `Connected to Database - ${databaseName}`, 
+      message: 'Please log in',
+      showLogin: true
+  });
   });
   
   passport.use(new LocalStrategy((username, password, done) => {
