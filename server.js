@@ -23,9 +23,10 @@ app.use(session({
    }
  }));
 
-// Then: set up the middleware passport.session() and passport.initialize()
-app.use(passport.session());
+// Then: set up the middleware passport.initialize() and passport.session()
 app.use(passport.initialize());
+app.use(passport.session());
+
 
 
 fccTesting(app); //For FCC testing purposes
