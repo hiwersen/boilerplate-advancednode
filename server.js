@@ -18,9 +18,10 @@ app.use(session({
   cookie: { secure: false }
  }));
 
-// Then: set up the middleware passport.initialize() and passport.session()
-app.use(passport.initialize());
+// Then: set up the middleware passport.session() and passport.initialize()
 app.use(passport.session());
+app.use(passport.initialize());
+
 
 fccTesting(app); //For FCC testing purposes
 app.use('/public', express.static(process.cwd() + '/public'));
