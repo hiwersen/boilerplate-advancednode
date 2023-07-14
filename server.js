@@ -7,6 +7,7 @@ const session = require('express-session');
 const passport = require('passport');
 const { ObjectID } = require('mongodb');
 const LocalStrategy = require('passport-local');
+const bcrypt = require('bcrypt');
 
 const app = express();
 app.set('view engine', 'pug');
@@ -53,7 +54,7 @@ myDB(async client => {
       console.log(`User ${username} attempted to log in.`);
       if (error) return done(error);
       if (!user) return done(null, false);
-      if (password !== user.password) return done(null, false);
+      if (!bcrypt.compareSync(password, user.password)) return done(null, false);
       return done(null, user);
     });
   }));
@@ -69,11 +70,14 @@ myDB(async client => {
   });
 
   app.route('/register').post((req, res, next) => {
+    const hash = bcrypt.hashSync(req.body.password, 12);
+    console.log(hash);
+
     myDataBase.findOne({ username: req.body.username }, (error, user) => {
       if (error) return next(error);
       if (user) return res.redirect('/');
       myDataBase.insertOne(
-        { username: req.body.username, password: req.body.password }, 
+        { username: req.body.username, password: hash }, 
         (error, insertResult) => {
           if (error) return res.redirect('/');
           console.log(`A new user ${insertResult.ops[0].username} was created and saved to the database`);
@@ -90,7 +94,7 @@ myDB(async client => {
 
   const ensureAuthenticated = (req, res, next) => {
     if (req.isAuthenticated()) return next();
-    console.log('Unauthenticated user tried to access /profile page');
+    console.log('Non-authenticated user tried to access /profile page');
     return res.redirect('/');
   };
 
