@@ -74,10 +74,10 @@ myDB(async client => {
       if (user) return res.redirect('/');
       myDataBase.insertOne(
         { username: req.body.username, password: req.body.password }, 
-        (error, user) => {
+        (error, insertResult) => {
           if (error) return res.redirect('/');
-          console.log(`A new user ${user.username} was created and saved to the database`);
-          next(null, user.ops[0]);
+          console.log(`A new user ${insertResult[0].username} was created and saved to the database`);
+          next(null, insertResult.ops[0]);
         });
     });
   }, passport.authenticate('local', { failureRedirect: '/' }), (req, res) => {
