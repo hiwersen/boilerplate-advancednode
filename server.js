@@ -76,7 +76,7 @@ myDB(async client => {
         { username: req.body.username, password: req.body.password }, 
         (error, insertResult) => {
           if (error) return res.redirect('/');
-          console.log(`A new user ${insertResult[0].username} was created and saved to the database`);
+          console.log(`A new user ${insertResult.ops[0].username} was created and saved to the database`);
           next(null, insertResult.ops[0]);
         });
     });
