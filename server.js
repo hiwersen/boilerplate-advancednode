@@ -43,7 +43,8 @@ myDB(async client => {
     res.render('index', { 
       title: `Connected to Database - ${databaseName}`, 
       message: 'Please log in',
-      showLogin: true
+      showLogin: true,
+      showRegistration: true
   });
   });
   
@@ -65,6 +66,22 @@ myDB(async client => {
     myDataBase.findOne({ _id: new ObjectID(id) }, (error, doc) => {
       done(null, doc);
     });
+  });
+
+  app.route('/register').post((req, res, next) => {
+    myDataBase.findOne({ username: req.body.username }, (error, user) => {
+      if (error) return next(error);
+      if (user) return res.redirect('/');
+      myDataBase.insertOne(
+        { username: req.body.username, password: req.body.password }, 
+        (error, user) => {
+          if (error) return res.redirect('/');
+          // A new user was created and saved to the DB
+          next(null, user.ops[0]);
+        });
+    });
+  }, passport.authenticate('local', { failureRedirect: '/' }), (req, res) => {
+    res.redirect('/profile');
   });
 
   app.route('/login').post(passport.authenticate('local', { failureRedirect: '/' }), (req, res) => {
