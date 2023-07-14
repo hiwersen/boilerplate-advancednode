@@ -76,7 +76,7 @@ myDB(async client => {
         { username: req.body.username, password: req.body.password }, 
         (error, user) => {
           if (error) return res.redirect('/');
-          // A new user was created and saved to the DB
+          console.log(`A new user ${user.username} was created and saved to the database`);
           next(null, user.ops[0]);
         });
     });
@@ -90,7 +90,7 @@ myDB(async client => {
 
   const ensureAuthenticated = (req, res, next) => {
     if (req.isAuthenticated()) return next();
-    console.log('Non authenticated user tried to access /profile page');
+    console.log('Unauthenticated user tried to access /profile page');
     return res.redirect('/');
   };
 
