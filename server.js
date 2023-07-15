@@ -8,6 +8,8 @@ const passport = require('passport');
 const { ObjectID } = require('mongodb');
 const LocalStrategy = require('passport-local');
 const bcrypt = require('bcrypt');
+const routes = require('./routes.js');
+const auth = require('./auth.js');
 
 const app = express();
 app.set('view engine', 'pug');
@@ -40,76 +42,8 @@ myDB(async client => {
 
   console.log(`Connected to Database - ${databaseName}. Please log in`);
 
-  app.route('/').get((req, res) => {
-    res.render('index', { 
-      title: `Connected to Database - ${databaseName}`, 
-      message: 'Please log in',
-      showLogin: true,
-      showRegistration: true
-  });
-  });
-  
-  passport.use(new LocalStrategy((username, password, done) => {
-    myDataBase.findOne({ username }, (error, user) => {
-      console.log(`User ${username} attempted to log in.`);
-      if (error) return done(error);
-      if (!user) return done(null, false);
-      if (!bcrypt.compareSync(password, user.password)) return done(null, false);
-      return done(null, user);
-    });
-  }));
-
-  passport.serializeUser((user, done) => {
-    done(null, user._id);
-  });
-  
-  passport.deserializeUser((id, done) => {
-    myDataBase.findOne({ _id: new ObjectID(id) }, (error, doc) => {
-      done(null, doc);
-    });
-  });
-
-  app.route('/register').post((req, res, next) => {
-    const hash = bcrypt.hashSync(req.body.password, 12);
-    console.log(hash);
-
-    myDataBase.findOne({ username: req.body.username }, (error, user) => {
-      if (error) return next(error);
-      if (user) return res.redirect('/');
-      myDataBase.insertOne(
-        { username: req.body.username, password: hash }, 
-        (error, insertResult) => {
-          if (error) return res.redirect('/');
-          console.log(`A new user ${insertResult.ops[0].username} was created and saved to the database`);
-          next(null, insertResult.ops[0]);
-        });
-    });
-  }, passport.authenticate('local', { failureRedirect: '/' }), (req, res) => {
-    res.redirect('/profile');
-  });
-
-  app.route('/login').post(passport.authenticate('local', { failureRedirect: '/' }), (req, res) => {
-    res.redirect('/profile');
-  });
-
-  const ensureAuthenticated = (req, res, next) => {
-    if (req.isAuthenticated()) return next();
-    console.log('Non-authenticated user tried to access /profile page');
-    return res.redirect('/');
-  };
-
-  app.route('/profile').get(ensureAuthenticated, (req, res) => {
-    res.render('profile', { username: req.user.username });
-  });
-
-  app.route('/logout'). get((req, res) => {
-    req.logout();
-    res.redirect('/');
-  });
-
-  app.use((req, res, next) => {
-    res.status(404).type('text').send('Not Found');
-  });
+  auth(app, myDataBase);
+  routes(app, myDataBase);
 
 }).catch(error => {
   app.route('/').get((req, res) => {
