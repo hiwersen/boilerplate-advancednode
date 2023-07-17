@@ -2,7 +2,6 @@ $(document).ready(function () {
   /*global io*/
   let socket = io();
 
-
   socket.on('user', data => {
     $('#num-users').text(`${data.currentUsers} users online`);
     let message = data.username + 
@@ -10,11 +9,16 @@ $(document).ready(function () {
     $('#messages').append($('<li>').html(`<b>${message}</b>`));
   });
 
+  socket.on('chat message', data => {
+    $('#messages').append($('<li>').text(`${data.username}: ${data.message}`));
+  });
+
   // Form submittion with new message in field with id 'm'
   $('form').submit(function () {
     var messageToSend = $('#m').val();
-
     $('#m').val('');
+    socket.emit('chat message', messageToSend);
     return false; // prevent form submit from refreshing page
   });
+
 });
